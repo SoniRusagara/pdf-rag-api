@@ -37,3 +37,26 @@ def require_live_services():
         pytest.skip("No data in Qdrant - ingest a PDF first via the Inngest Dev Server")
 
 # ── performance tests ─────────────────────────────────────────────────────────
+class TestQueryLatency:
+    """ Measures end-to-end query latency (embedding + vector search)"""
+
+    SAMPLE_QUESTIONS = [
+        "What are the key skills listed in this document?",
+        "What is the main topic of this PDF?",
+        "Summarize the most important points.",
+    ]
+
+    def test_single_query_under_5_seconds(self):
+        """Single query (embedding + search) should complete in under 5s"""
+        #TODO: Make this much faster as it is a loose sanity check 
+        from data_loader import embed_texts
+        from vector_db import QdrantStorage 
+
+        start = time.time()
+        query_vec = embed_texts([self.SAMPLE_QUESTIONS[0]])[0]
+        store = QdrantStorage()
+        store.search(query_vec, top_k=5)
+        elapsed_ms = (time.time() - start) * 1000
+
+        print(f"\n Single query latency: {elapsed_ms:.0f}ms")
+        assert elapsed_ms < 5000, f"Query took {elapsed_ms:.0f}ms, expected under 5000ms"
