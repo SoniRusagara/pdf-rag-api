@@ -60,3 +60,79 @@ class TestQueryLatency:
 
         print(f"\n Single query latency: {elapsed_ms:.0f}ms")
         assert elapsed_ms < 5000, f"Query took {elapsed_ms:.0f}ms, expected under 5000ms"
+
+    def test_average_latency_across_3_runs(self):
+        """Runs 3 queries & prints average latency"""
+        from data_loader import embed_texts
+        from vector_db import QdrantStorage
+
+        latencies = []
+
+        for i, question in enumerate(self.SAMPLE_QUESTIONS):
+            start = time.time()
+            query_vec = embed_texts([question])[0]
+            store = QdrantStorage()
+            store.search(query_vec, top_k=5)
+            elapsed_ms = (time.time() - start) * 1000
+            latencies.append(elapsed_ms)
+            print(f"\n Run {i+1}: {elapsed_ms:.0f}ms - '{question[:40]}...'")
+
+        avg = sum(latencies) / len(latencies)
+        fastest = min(latencies)
+        slowest = max(latencies)
+
+        print(f"\n {'='*40}")
+        print(f"  Average latency : {avg:.0f}ms")
+        print(f"  Fastest         : {fastest:.0f}ms")
+        print(f"  Slowest         : {slowest:.0f}ms")
+        print(f"  {'='*40}")
+        print(f"  Resume Point    : <{round(avg/100)*100 + 100}ms avg query latency")
+
+        # Should average under 10 seconds (network to OpenAI + Qdrant search)
+        assert avg < 10000, f"Average latency {avg:.0f}ms is too slow"
+
+    
+    def test_qdrant_search_only_latency(self):
+        """
+        Measures the Qdrant vector search without an OpenAI call. 
+        To isolate db performance & network latency 
+        """
+        from data_loader import embed_texts
+        from vector_db import QdrantStorage
+
+        # Get embedding once (outside timed section)
+        query_vec = embed_texts([self.SAMPLE_QUESTIONS[0]])[0]
+        store = QdrantStorage()
+
+        # Time the Qdrant search 
+        start = time.time()
+        results = store.search(query_vec, top_k=5)
+        elapsed_ms = (time.time() - start) * 1000
+
+        print(f"\n Qdrant search only: {elapsed_ms:.0f}ms")
+        print(f"  Chunks retrieved  : {len(results['contexts'])}")
+        assert elapsed_ms < 1000, f"Qdrant search took {elapsed_ms:.0f}ms, expected under 1000ms"
+
+
+
+class TestIngestionScale:
+    """Reports on the scale of data currently in the vector DB"""
+
+    def test_report_collection_stats(self):
+        """Prints current collection size - TODO: use this for resume metrics"""
+        r = requests.get("http://localhost:6333/collections/docs")
+        data = r.json().get("result", {})
+        points = data.get("points_count", 0)
+        config = data.get("config", {})
+        vector_size = config.get("params", {}).get("vectors", {}).get("size", "unknown")
+
+        print(f"\n {'='*40}")
+        print(f"  Chunks in Qdrant  : {points}")
+        print(f"  Embedding dims    : {vector_size}")
+        print(f"  {'='*40}")
+        print(f"  TODO-PUT ON RESUME     : ingested {points} chunks across indexed PDFs")
+        print(f"                      using {vector_size}-dimensional embeddings")
+
+        assert points > 0, "No chunks found - ingest a PDF first"
+        assert vector_size == 3072, f"Expected 3072-D embeddings, got {vector_size}"
+
