@@ -91,7 +91,7 @@ class TestLoadAndChunkPdf:
             assert len(chunks) > 0 
 
             # Confirms every chunk is a real non-empty string 
-            assert all(isinstance(c, str) and c.string() != "" for c in chunks)
+            assert all(isinstance(c, str) and c.strip() != "" for c in chunks)
 
             # Confirms the content actually came from page 1 
             assert all("Real content here" in c for c in chunks)
