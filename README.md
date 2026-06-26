@@ -1,6 +1,6 @@
 # 📄 PDF RAG API
 
-A Retrieval-Augmented Generation (RAG) pipeline for ingesting and querying PDF documents using semantic search and LLM-powered responses. Built to explore how production-oriented AI systems handle document ingestion, retrieval, and workflow orchestration beyond a simple proof of concept.
+A Retrieval-Augmented Generation (RAG) pipeline for ingesting and querying PDF documents using semantic search and LLM-powered responses. Built to explore how production-oriented AI systems handle document ingestion, retrieval, and workflow orchestration beyond a simple project.
 
 Unlike most RAG demos, this project focuses on operational concerns such as workflow orchestration, fault tolerance, observability, and ingestion controls.
 
