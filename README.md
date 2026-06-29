@@ -4,6 +4,9 @@ A Retrieval-Augmented Generation (RAG) pipeline for ingesting and querying PDF d
 
 Unlike most RAG demos, this project focuses on operational concerns such as workflow orchestration, fault tolerance, observability, and ingestion controls.
 
+## 🚀 Live Demo
+https://pdf-rag-api-3xbo55cxdutrhrywmy4na5.streamlit.app/
+
 ## Overview
 
 Upload a PDF, ask a question, and receive a grounded answer based on the document's contents.
