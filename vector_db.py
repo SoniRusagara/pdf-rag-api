@@ -9,7 +9,7 @@ class QdrantStorage:
         api_key = api_key or os.getenv("QDRANT_API_KEY")
         
         # Crashes if db doesnt connect in 30seconds 
-        self.client = QdrantClient(url=url, timeout=30)
+        self.client = QdrantClient(url=url, api_key=api_key, timeout=30)
         self.collection = collection
         if not self.client.collection_exists(self.collection):
             self.client.create_collection(
