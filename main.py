@@ -20,6 +20,9 @@ inngest_client = inngest.Inngest(
     serializer=inngest.PydanticSerializer()
 )
 
+# Single shared connection, resued across all requests
+qdrant_store = QdrantStorage()
+
 # Run this workflow when a PDF ingestion event is received
 @inngest_client.create_function(
     fn_id="RAG: Ingest PDF",
@@ -59,7 +62,7 @@ async def rag_ingest_pdf(ctx: inngest.Context):
         payloads = [{"source": source_id, "text": chunks[i]} for i in range(len(chunks))]
         
         # Save embeddings and metadata to Qdrant
-        QdrantStorage().upsert(ids, vecs, payloads)
+        qdrant_store.upsert(ids, vecs, payloads)
 
         # Return the number of chunks ingested
         return RAGUpsertResult(ingested=len(chunks))
@@ -79,10 +82,8 @@ async def rag_query_pdf_ai(ctx: inngest.Context):
     def _search(question: str, top_k: int = 5) -> RAGSearchResult:
         # Convert the user's question into an embedding vector 
         query_vec = embed_texts([question])[0]
-        # Connect to the vector db 
-        store = QdrantStorage()
         # Retrieve the most relevant chunks from Qdrant 
-        found = store.search(query_vec, top_k)
+        found = qdrant_store.search(query_vec, top_k)
         # TODO: Add comment here 
         return RAGSearchResult(contexts=found["contexts"], sources=found["sources"])
     
