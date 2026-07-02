@@ -218,10 +218,10 @@ def wait_for_output(event_id: str, timeout_s: float = 120.0) -> dict:
 
 def _qdrant_headers():
     return {"api-key": QDRANT_API_KEY} if QDRANT_API_KEY else {}
-    
+
 def check_qdrant() -> bool:
     try:
-        r = requests.get("http://localhost:6333/collections", timeout=2)
+        r = requests.get(f"{QDRANT_URL}/collections", headers=_qdrant_headers(), timeout=5)
         return r.status_code == 200
     except Exception:
         return False
@@ -229,7 +229,7 @@ def check_qdrant() -> bool:
 
 def get_doc_count() -> int:
     try:
-        r = requests.get("http://localhost:6333/collections/docs", timeout=2)
+        r = requests.get(f"{QDRANT_URL}/collections/docs", headers=_qdrant_headers(), timeout=5)
         if r.status_code == 200:
             return r.json().get("result", {}).get("points_count", 0)
     except Exception:
