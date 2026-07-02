@@ -48,3 +48,18 @@ class QdrantStorage:
                 sources.add(source)
 
         return {"contexts": contexts, "sources": list(sources)}
+
+    # Helper fx to count the amount of PDFs ingested 
+    def count_unique_sources(self):
+        results, _ = self.client.scroll(
+            collection_name=self.collection,
+            limit=10000,
+            with_payload=True,
+            with_vectors=False,
+        )
+
+        sources = set()
+        for r in results:
+            sources.add(r.payload.get("source"))
+
+        return len(sources)
