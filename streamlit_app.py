@@ -216,7 +216,9 @@ def wait_for_output(event_id: str, timeout_s: float = 120.0) -> dict:
             raise TimeoutError(f"Timed out (last status: {last_status})")
         time.sleep(0.5)
 
-
+def _qdrant_headers():
+    return {"api-key": QDRANT_API_KEY} if QDRANT_API_KEY else {}
+    
 def check_qdrant() -> bool:
     try:
         r = requests.get("http://localhost:6333/collections", timeout=2)
