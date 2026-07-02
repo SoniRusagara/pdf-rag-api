@@ -28,7 +28,7 @@ qdrant_store = QdrantStorage()
     fn_id="RAG: Ingest PDF",
     trigger=inngest.TriggerEvent(event="rag/ingest_pdf"),
     throttle=inngest.Throttle(
-        count=2, period=datetime.timedelta(minutes=1)
+        limit=2, period=datetime.timedelta(minutes=1)
     ),
     rate_limit=inngest.RateLimit(
         limit=1,

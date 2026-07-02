@@ -3,6 +3,7 @@ Performance tests for pdf-rag-api
 Measures latency against live Qdrant + OpenAI
 """
 
+import os
 import time 
 import pytest 
 import requests 
@@ -10,17 +11,24 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+QDRANT_URL = os.getenv("QDRANT_URL", "http://localhost:6333")
+QDRANT_API_KEY = os.getenv("QDRANT_API_KEY")
+
+def _headers():
+    # For Qdrant Cloud (Local Qdrant ignores it)
+    return {"api-key": QDRANT_API_KEY} if QDRANT_API_KEY else {}
+
 # ── helpers ───────────────────────────────────────────────────────────────────
 def qdrant_is_running() -> bool:
     try:
-        r = requests.get("http://localhost:6333/collections", timeout=2)
+        r = requests.get(f"{QDRANT_URL}/collections", headers=_headers(), timeout=5)
         return r.status_code == 200
     except Exception: 
         return False 
 
 def collection_has_data() -> bool: 
     try: 
-        r = requests.get("http://localhost:6333/collections/docs", timeout=2)
+        r = requests.get(f"{QDRANT_URL}/collections/docs", headers=_headers(), timeout=5)
         count = r.json().get("result", {}).get("points_count", 0)
         return count > 0
     except Exception:
@@ -120,7 +128,7 @@ class TestIngestionScale:
 
     def test_report_collection_stats(self):
         """Prints current collection size - TODO: use this for resume metrics"""
-        r = requests.get("http://localhost:6333/collections/docs")
+        r = requests.get(f"{QDRANT_URL}/collections/docs", headers=_headers())
         data = r.json().get("result", {})
         points = data.get("points_count", 0)
         config = data.get("config", {})
