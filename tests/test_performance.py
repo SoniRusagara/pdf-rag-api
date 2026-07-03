@@ -122,6 +122,42 @@ class TestQueryLatency:
         assert elapsed_ms < 1000, f"Qdrant search took {elapsed_ms:.0f}ms, expected under 1000ms"
 
 
+    def test_concurrent_queries_complete_successfully(self):
+        """
+        Fires multiple queries concurrently to confirm the system handles
+        simultaneous requests without errors or major slowdown.
+        Simulates multiple users querying at the same time.
+        """
+        import concurrent.futures
+        from data_loader import embed_texts
+        from vector_db import QdrantStorage
+
+        def run_query(question: str) -> float:
+            start = time.time()
+            query_vec = embed_texts([question])[0]
+            store = QdrantStorage()
+            store.search(query_vec, top_k=5)
+            return (time.time() - start) * 1000
+
+        questions = self.SAMPLE_QUESTIONS * 2  # 6 total queries
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
+            start = time.time()
+            latencies = list(executor.map(run_query, questions))
+            total_elapsed_ms = (time.time() - start) * 1000
+
+        avg = sum(latencies) / len(latencies)
+
+        print(f"\n {'='*40}")
+        print(f"  Concurrent queries : {len(questions)}")
+        print(f"  Total wall time    : {total_elapsed_ms:.0f}ms")
+        print(f"  Avg per query      : {avg:.0f}ms")
+        print(f"  {'='*40}")
+
+        # All queries should complete, and concurrency should help as well
+        assert total_elapsed_ms < 15000, f"Concurrent batch took {total_elapsed_ms:.0f}ms, too slow"
+
+
 
 class TestIngestionScale:
     """Reports on the scale of data currently in the vector DB"""
