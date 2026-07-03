@@ -1,5 +1,24 @@
+import os
+from dotenv import load_dotenv
 from vector_db import QdrantStorage
+
+load_dotenv()
 
 qdrant_store = QdrantStorage()
 
-print("PDFs indexed:", qdrant_store.count_unique_sources())
+results, _ = qdrant_store.client.scroll(
+    collection_name=qdrant_store.collection,
+    limit=10000,
+    with_payload=True,
+    with_vectors=False,
+)
+
+sources = {
+    os.path.basename(r.payload.get("source", ""))
+    for r in results
+}
+
+print("PDFs indexed:", len(sources))
+print("Sources:")
+for source in sorted(sources):
+    print(f" - {source}")
