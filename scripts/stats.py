@@ -1,6 +1,9 @@
 import os
 from dotenv import load_dotenv
 from vector_db import QdrantStorage
+"""
+uv run python -m scripts.stats
+"""
 
 load_dotenv()
 
