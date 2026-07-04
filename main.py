@@ -39,7 +39,6 @@ qdrant_store = QdrantStorage()
 async def rag_ingest_pdf(ctx: inngest.Context):
     # Internal step to extract and split PDF content for processing
     def _load(ctx: inngest.Context) -> RAGChunkAndSrc:
-        # TODO: Add explaining comments here 
         pdf_path = ctx.event.data["pdf_path"]
         source_id = ctx.event.data.get("source_id") or os.path.basename(pdf_path)
         chunks = load_and_chunk_pdf(pdf_path)
@@ -84,7 +83,6 @@ async def rag_query_pdf_ai(ctx: inngest.Context):
         query_vec = embed_texts([question])[0]
         # Retrieve the most relevant chunks from Qdrant 
         found = qdrant_store.search(query_vec, top_k)
-        # TODO: Add comment here 
         return RAGSearchResult(contexts=found["contexts"], sources=found["sources"])
     
     # Get the user's question from the event payload 

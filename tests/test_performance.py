@@ -56,7 +56,6 @@ class TestQueryLatency:
 
     def test_single_query_under_5_seconds(self):
         """Single query (embedding + search) should complete in under 5s"""
-        #TODO: Make this much faster as it is a loose sanity check 
         from data_loader import embed_texts
         from vector_db import QdrantStorage 
 
