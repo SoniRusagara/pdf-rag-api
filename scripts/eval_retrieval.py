@@ -61,7 +61,7 @@ def run_eval():
     print(f"  Top-3 accuracy    : {top3_correct}/{total} ({100*top3_correct/total:.1f}%)")
     print(f"{'='*50}\n")
 
-    # Show any misses for debugging
+    # Shows any misses for debugging
     misses = [r for r in results_log if not r["top3_hit"]]
     if misses:
         print("Missed questions:")
